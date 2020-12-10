@@ -316,3 +316,4 @@ void BuscarDefinicion(TablaHash *tabla)
     DeftWith(tabla,def);
     system("pause");
 }
+
