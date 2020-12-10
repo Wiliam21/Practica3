@@ -1,0 +1,20 @@
+Vape:Dispositivo electrinico de administracion de nicotina
+Audifonos:Para escuchar musica
+Perro:Animal canino domestico
+Lapiz:Tubo de madera con grafito en medio
+Banco:Donde guardo dinero
+Boligrafo:Herramienta para escribir con tinta
+Xbox:Consola de videojuegos
+Botella:Utensilio que se utiliza para el almacenamiento de liquidos
+Laptop:Computador portatil
+Mar:Gran extencion de agua
+Celular:Dispositivo electronico portatil
+Gato:Felino que es domestico
+Mouse:Periferico para desplazar el cursor
+Teclado:Periferico para escribir
+Playera:Prenda de ropa para cubrir el torzo
+Ojo:Organo que permite ver
+Nariz:Organo que permite percibir aromas
+Casa:Contruccion para vivir
+SSD:Unidad de almacenamiento de estado solido
+HDD:Disco duro de almacenamiento
