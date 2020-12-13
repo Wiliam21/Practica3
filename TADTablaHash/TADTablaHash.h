@@ -41,5 +41,5 @@ Elemento SearchBykey(TablaHash *tabla,Key key,boolean debug);
 void DeleteByKey(TablaHash *tabla,Key key,boolean debug);
 void ModifyByKey(TablaHash *tabla,Key key, Elemento elemento,boolean debug);
 void ShowStats(TablaHash *tabla);
-void KeyStartWith(TablaHash *tabla, char c);
-void DeftWith(TablaHash *tabla, Definition def);
+Lista* KeyStartWith(TablaHash *tabla, char c);
+Lista* DeftWith(TablaHash *tabla, Definition def);

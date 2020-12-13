@@ -13,7 +13,8 @@ void ModificarPalabra(TablaHash *tabla);
 void EliminarPalabra(TablaHash *tabla);
 void MostrarEstadisticas(TablaHash *tabla);
 void ExportarTabla(TablaHash *tabla);
-void ExportarElemento(TablaHash *tabla, Elemento elemento);
+void ExportarElemento(Elemento elemento);
+void ExportarElementos(Lista *lista);
 
 #define DEBUG TRUE
 
@@ -110,53 +111,20 @@ void CargarArchivo(TablaHash *tabla)
     {
         system("cls");
         Elemento temp;
-        int cont;
-        boolean llave = TRUE;
-        char c = fgetc(file);
-        while (c != EOF)
+        while (!feof(file))
         {
-            if (llave && cont == 0)
+            fscanf(file, "%[^:]", temp.key.key);
+            if (fgetc(file) == EOF)
             {
-                printf("\nLlave: ");
+                fclose(file);
+                break;
             }
-            else if (!llave && cont == 0)
-            {
-                printf("\nDefinicion: ");
-            }
-
-            if (c != '\n' && c != ':')
-            {
-                if (llave)
-                {
-                    temp.key.key[cont] = c;
-                    printf("%c", c);
-                }
-                else
-                {
-                    temp.definition.definition[cont] = c;
-                    printf("%c", c);
-                }
-                cont++;
-            }
-            else if (c == ':')
-            {
-                llave = FALSE;
-                cont = 0;
-            }
-            else if (c == '\n')
-            {
-                AddElement(tabla, temp, FALSE);
-                llave = TRUE;
-                cont = 0;
-                memset(temp.definition.definition, '\0', 251);
-                memset(temp.key.key, '\0', 101);
-            }
-
-            c = fgetc(file);
-        }
-        if (!llave)
-        {
+            fscanf(file, "%[^\n]", temp.definition.definition);
+            printf("%s:%s\n", temp.key.key, temp.definition.definition);
+            fgetc(file);
             AddElement(tabla, temp, FALSE);
+            memset(temp.definition.definition, '\0', 251);
+            memset(temp.key.key, '\0', 101);
         }
 
         printf(ANSI_COLOR_GREEN "\n\nDiccionario cargado\n" ANSI_COLOR_RESET);
@@ -199,7 +167,7 @@ void BuscarPalabra(TablaHash *tabla)
         scanf("%d", &op);
         if (op == 1)
         {
-            ExportarElemento(tabla, temp);
+            ExportarElemento(temp);
         }
     }
     else
@@ -274,9 +242,9 @@ void ExportarTabla(TablaHash *tabla)
     system("pause");
 }
 
-void ExportarElemento(TablaHash *tabla, Elemento elemento)
+void ExportarElemento(Elemento elemento)
 {
-    char dir[100];
+    char dir[100], c;
     printf("\nIngresa el nombre del archivo (En caso de ya exitir se agrega al final, si no se crea el archivo)\n");
     printf("Archivo: ");
     fflush(stdin);
@@ -288,8 +256,25 @@ void ExportarElemento(TablaHash *tabla, Elemento elemento)
     }
 
     FILE *file;
-    file = fopen(dir, "a");
-    fprintf(file, "%s:%s\n", elemento.key.key, elemento.definition.definition);
+    fpos_t pos;
+    file = fopen("temp.txt", "a+");
+    fprintf(file, " ");
+    fgetpos(file, &pos);
+    pos = pos - 2;
+    fsetpos(file, &pos);
+    c = fgetc(file);
+    fclose(file);
+    file = fopen("temp.txt", "r+");
+    pos = pos + 1;
+    fsetpos(file, &pos);
+    if (c == '\n' || pos < 3)
+    {
+        fprintf(file, "%s:%s\n", elemento.key.key, elemento.definition.definition);
+    }
+    else
+    {
+        fprintf(file, "\n%s:%s\n", elemento.key.key, elemento.definition.definition);
+    }
     fclose(file);
     printf(ANSI_COLOR_GREEN "\nDatos exportados\n" ANSI_COLOR_RESET);
     system("pause");
@@ -297,23 +282,123 @@ void ExportarElemento(TablaHash *tabla, Elemento elemento)
 
 void BuscarPalabraPorLetra(TablaHash *tabla)
 {
-    printf("\nBuscar las palabras que inicie con una letra\n");
+    printf("\tBuscar las palabras que inicie con una letra\n");
     char c;
-    printf("Ingresa la letra con que deben iniciar las palabras: ");
+    int i, op;
+    Lista *lista;
+    printf("\nIngresa la letra con que deben iniciar las palabras: ");
     fflush(stdin);
-    scanf("%c",&c);
-    KeyStartWith(tabla,c);
+    scanf("%c", &c);
+    system("cls");
+    lista = KeyStartWith(tabla, c);
+    if (Size(lista) == 0)
+    {
+        printf(ANSI_COLOR_YELLOW "\nNo se ha encontrado ninguna palabra que inicie con %c\n" ANSI_COLOR_RESET, c);
+    }
+    else
+    {
+        Elemento temp;
+        printf("Palabras que inician con %c\n", c);
+        for (i = 1; i <= Size(lista); i++)
+        {
+            temp = Element(lista, i);
+            printf("\n%s:%s\n", temp.key.key, temp.definition.definition);
+        }
+
+        printf(ANSI_COLOR_GREEN "\nTotal de palabras encontradas: %d\n" ANSI_COLOR_RESET, Size(lista));
+        printf("\nDeseas exportar esta lista de palabras y su definicion a un archivo\n1) Si\n2) No\n");
+        printf("Ingresa la opcion: ");
+        scanf("%d", &op);
+        if (op == 1)
+        {
+            ExportarElementos(lista);
+        }
+    }
     system("pause");
 }
 
 void BuscarDefinicion(TablaHash *tabla)
 {
-    printf("\nBuscar las definiciones que contengan una frase o palabra\n");
+    printf("\tBuscar las definiciones que contengan una frase o palabra\n");
     Definition def;
-    printf("Palabra o frase: ");
+    int i, op;
+    printf("\nPalabra o frase: ");
     fflush(stdin);
-    scanf("%[^\n]",def.definition);
-    DeftWith(tabla,def);
+    scanf("%[^\n]", def.definition);
+    system("cls");
+    Lista *lista;
+    lista = DeftWith(tabla, def);
+    if (Size(lista) == 0)
+    {
+        printf(ANSI_COLOR_YELLOW "\nNo se ha encontrado ninguna palabra que contengan \"%s\"\n" ANSI_COLOR_RESET, def.definition);
+    }
+    else
+    {
+        Elemento temp;
+        printf("Palabras que contienen \"%s\"\n", def.definition);
+        for (i = 1; i <= Size(lista); i++)
+        {
+            temp = Element(lista, i);
+            printf("\n%s:%s\n", temp.key.key, temp.definition.definition);
+        }
+        printf(ANSI_COLOR_GREEN "\nTotal de palabras encontradas: %d\n" ANSI_COLOR_RESET, Size(lista));
+        printf("\nDeseas exportar esta lista de palabras y su definicion a un archivo\n1) Si\n2) No\n");
+        printf("Ingresa la opcion: ");
+        scanf("%d", &op);
+        if (op == 1)
+        {
+            ExportarElementos(lista);
+        }
+    }
     system("pause");
 }
 
+void ExportarElementos(Lista *lista)
+{
+    int cont = 1;
+    char dir[100], c;
+    Elemento temp;
+    printf("\nIngresa el nombre del archivo (En caso de ya exitir se agrega al final, si no se crea el archivo)\n");
+    printf("Archivo: ");
+    fflush(stdin);
+    scanf("%[^\n]", dir);
+    getchar();
+    if (strstr(dir, ".txt") == NULL)
+    {
+        strcat(dir, ".txt");
+    }
+
+    FILE *file;
+    fpos_t pos;
+    Posicion listPos = First(lista);
+    file = fopen("temp.txt", "a+");
+    fprintf(file, " ");
+    fgetpos(file, &pos);
+    pos = pos - 2;
+    fsetpos(file, &pos);
+    c = fgetc(file);
+    fclose(file);
+    file = fopen("temp.txt", "r+");
+    pos = pos + 1;
+    fsetpos(file, &pos);
+    temp = Position(lista, listPos);
+    if (c == '\n' || pos < 3)
+    {
+        fprintf(file, "%s:%s\n", temp.key.key, temp.definition.definition);
+    }
+    else
+    {
+        fprintf(file, "\n%s:%s\n", temp.key.key, temp.definition.definition);
+    }
+
+    listPos = Following(lista, listPos);
+    while (listPos != NULL)
+    {
+        temp = Position(lista, listPos);
+        fprintf(file, "%s:%s\n", temp.key.key, temp.definition.definition);
+        listPos = Following(lista, listPos);
+    }
+
+    fclose(file);
+    printf(ANSI_COLOR_GREEN "\nDatos exportados\n" ANSI_COLOR_RESET);
+}

@@ -187,9 +187,12 @@ void ShowStats(TablaHash *tabla)
     printf(ANSI_COLOR_CYAN "\nTotal de elementos: %d\nTotal de colisiones: %d\nListas vacias: %d\n" ANSI_COLOR_RESET, elementos, totalcol, contVacias);
 }
 
-void KeyStartWith(TablaHash *tabla, char c)
+Lista* KeyStartWith(TablaHash *tabla, char c)
 {
     int i, cont = 0;
+    Lista *lista;
+    lista=(Lista *)malloc(sizeof(Lista));
+    Initialize(lista);
     Posicion pos;
     Elemento temp;
     for (i = 0; i < TAM; i++)
@@ -200,47 +203,34 @@ void KeyStartWith(TablaHash *tabla, char c)
             temp = Position(&(tabla->listas[i]), pos);
             if (temp.key.key[0] == c)
             {
-                printf("\nPalabra: %s\nDefinicion: %s\n", temp.key.key, temp.definition.definition);
-                cont++;
+                Add(lista,temp);
             }
             pos = Following(&(tabla->listas[i]), pos);
         }
     }
-    if (cont == 0)
-    {
-        printf(ANSI_COLOR_YELLOW "\nNo se ha encontrado ninguna palabra que inicie con %c" ANSI_COLOR_RESET, c);
-    }
-    else
-    {
-        printf(ANSI_COLOR_GREEN "\nTotal de palabras encontradas: %d\n" ANSI_COLOR_RESET, cont);
-    }
+    return lista;
 }
 
-void DeftWith(TablaHash *tabla, Definition def)
+Lista* DeftWith(TablaHash *tabla, Definition def)
 {
     int i, cont = 0;
     Posicion pos;
     Elemento temp;
+    Lista *lista;
+    lista=(Lista *)malloc(sizeof(Lista));
+    Initialize(lista);
     for (i = 0; i < TAM; i++)
     {
         pos = First(&(tabla->listas[i]));
         while (pos != NULL)
         {
             temp = Position(&(tabla->listas[i]), pos);
-            if (strstr(temp.definition.definition,def.definition)!=NULL)
+            if (strstr(temp.definition.definition, def.definition) != NULL)
             {
-                printf("\nPalabra: %s\nDefinicion: %s\n", temp.key.key, temp.definition.definition);
-                cont++;
+                Add(lista,temp);
             }
             pos = Following(&(tabla->listas[i]), pos);
         }
     }
-    if (cont == 0)
-    {
-        printf(ANSI_COLOR_YELLOW "\nNo se ha encontrado ninguna definicion que contenga \"%s\"" ANSI_COLOR_RESET, def.definition);
-    }
-    else
-    {
-        printf(ANSI_COLOR_GREEN "\nTotal de definicion encontradas: %d\n" ANSI_COLOR_RESET, cont);
-    }
+    return lista;
 }
