@@ -1,3 +1,7 @@
+/*
+COMPILACION: gcc .\main.c -o diccionario .\TADListaDL.o .\TADTablaHash.o
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -91,12 +95,13 @@ int MostrarMenu()
 void CargarArchivo(TablaHash *tabla)
 {
     printf("\tCargar datos de un archivo\n\n");
-    char dir[100];
+    char dir[100],c;
     printf("Ingresa la la ruta del archivo (en caso de estar en la misma carpeta que el programa solo ingresa el nombre):\n");
     printf("Archivo: ");
     fflush(stdin);
     scanf("%[^\n]", dir);
     getchar();
+    fpos_t pos;
     if (strstr(dir, ".txt") == NULL)
     {
         strcat(dir, ".txt");
@@ -113,15 +118,25 @@ void CargarArchivo(TablaHash *tabla)
         Elemento temp;
         while (!feof(file))
         {
-            fscanf(file, "%[^:]", temp.key.key);
+            fscanf(file, "%100[^:]", temp.key.key);
             if (fgetc(file) == EOF)
             {
                 fclose(file);
                 break;
             }
-            fscanf(file, "%[^\n]", temp.definition.definition);
+            if (fgetc(file) != ' ')
+            {
+                fgetpos(file, &pos);
+                pos = pos - 1;
+                fsetpos(file, &pos);
+            }
+            fscanf(file, "%250[^\n]", temp.definition.definition);
+            do
+            {
+                c=fgetc(file);
+            } while (c!='\n' && c!=EOF);
+            
             printf("%s:%s\n", temp.key.key, temp.definition.definition);
-            fgetc(file);
             AddElement(tabla, temp, FALSE);
             memset(temp.definition.definition, '\0', 251);
             memset(temp.key.key, '\0', 101);

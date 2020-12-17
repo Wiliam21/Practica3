@@ -79,7 +79,7 @@ void AddElement(TablaHash *tabla, Elemento elemento, boolean debug)
     }
     else
     {
-        printf(ANSI_COLOR_RED "\nYa existe ese elemento\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_RED "\n\tYa existe \"%s\"\n" ANSI_COLOR_RESET,elemento.key.key);
     }
 }
 
@@ -164,7 +164,7 @@ void DeleteByKey(TablaHash *tabla, Key key, boolean debug)
 
 void ShowStats(TablaHash *tabla)
 {
-    int i, col, size, elementos = 0, totalcol = 0, contVacias = 0;
+    int i, col, size, elementos = 0, totalcol = 0, contVacias = 0,max=0;
     for (i = 0; i < TAM; i++)
     {
         size = Size(&(tabla->listas[i]));
@@ -182,9 +182,13 @@ void ShowStats(TablaHash *tabla)
             printf(ANSI_COLOR_CYAN "\nLista: %d, Elementos: %d, Colisiones: %d" ANSI_COLOR_RESET, i, size, col);
             totalcol += col;
             elementos += size;
+            if (size>max)
+            {
+                max=size;
+            }
         }
     }
-    printf(ANSI_COLOR_CYAN "\nTotal de elementos: %d\nTotal de colisiones: %d\nListas vacias: %d\n" ANSI_COLOR_RESET, elementos, totalcol, contVacias);
+    printf(ANSI_COLOR_CYAN "\nTotal de elementos: %d\nTotal de colisiones: %d\nListas vacias: %d\nEl coste maximo es O(%d)\n" ANSI_COLOR_RESET, elementos, totalcol, contVacias,max);
 }
 
 Lista* KeyStartWith(TablaHash *tabla, char c)
